@@ -64,7 +64,7 @@ async def on_message(message):
         await client.send_message(message.channel, "**コマンドはDMでは使うことができません...**")
         return
 
-    if message.content.startswith(prefix + 'createrole'):
+    if message.content.startswith("麺類生成"):
         if message.channel.id == "516098503265484854":
             up = discord.Color(random.randint(0,0xFFFFFF))
             author = message.author
@@ -84,16 +84,19 @@ async def on_message(message):
                                   f'{message.author.mention} さんに{",".join([x.name for x in roles])}役職を付与しました！')
 
 
-    if message.content.startswith(prefix+'deleterole'):
+    if message.content.startswith("麺類廃棄"):
         if message.channel.id == "516098503265484854":
             role_name = message.content.split()[1]
             role = discord.utils.get(message.server.roles,name=role_name)
             await client.delete_role(message.server, role)
             await client.send_message(message.channel,f'作成完了:{role_name} の役職を削除しました')
 
-    if message.content.startswith(prefix + 'info'):
+    if message.content.startswith("個人情報"):
         try:
-            user = message.mentions[0]
+            if not message.mentions[0] == None:
+                user = message.author
+            else:
+                user = message.mentions[0]
             userjoindate = str(user.joined_at.strftime("%Y/%m/%d %H:%M:%S"))
             usercreatedate = str(user.created_at.strftime("%Y/%m/%d %H:%M:%S"))
             role = ", ".join([r.name for r in user.roles])
@@ -150,7 +153,7 @@ async def on_message(message):
         finally:
             pass
 
-    if message.content.startswith(prefix+'serverinfo') and message.content.endswith(prefix+'serverinfo'):
+    if message.content == "鯖情報":
         server=message.server
         region=message.server.region
         channelss=len(message.server.channels)
@@ -217,7 +220,85 @@ async def on_message(message):
         finally:
             pass
 
-    if message.content.startswith(prefix + 'help') and message.content.endswith(prefix + 'help'):
+     if message.content.startswith("リスト"):
+        async def send(member_data):
+            up = discord.Color(random.randint(0,0xFFFFFF))
+            name = message.content[4:]
+            role = discord.utils.get(message.server.roles,name=message.content[4:])
+            if not role == None:
+                nick_name = f"『{name}』役職を持っているメンバー！！"
+            else:
+                nick_name = f"{message.author}さん\n『{name}』役職はこの鯖には存在しておりません..."
+            embed = discord.Embed(
+                title=nick_name,
+                description=member_data,
+                color=up,
+                timestamp=message.timestamp
+            )
+            embed.set_author(
+                name="メンバー詳細:"
+            )
+            embed.set_footer(
+                text="現在時刻:"
+            )
+            await client.send_message(message.channel,embed=embed)
+
+        i = 1
+        member_data = ""
+        role = discord.utils.get(message.server.roles,name=message.content[4:])
+        for member in message.server.members:
+            if role is None:
+                member_data = ""
+                await send(member_data)
+                return
+            if role in member.roles:
+                member_data += "{0}人目:『{1}』\n".format(i,member.name)
+                if i % 100 == 0:
+                    await send(member_data)
+                    # リセットする
+                    member_data = ""
+                i += 1
+        else:
+            await send(member_data)
+            return
+
+    if message.content == "全麺類一覧":
+        def slice(li,n):
+            while li:
+                yield li[:n]
+                li = li[n:]
+
+        for roles in slice(message.server.role_hierarchy,50):
+            role = "\n".join(f'{i}: {role.mention}' for (i,role) in enumerate(roles,start=1) if role.mentionable)
+            userembed = discord.Embed(
+                title="麺類一覧:",
+                description=role,
+                color=discord.Color.light_grey()
+            )
+
+            userembed.set_thumbnail(
+                url=message.server.icon_url
+            )
+            userembed.set_author(
+                name=message.server.name + "の全麺類情報:"
+            )
+            await client.send_message(message.channel,embed=userembed)
+        await client.send_message(message.channel,"この鯖の麺類の合計の数は`{}`です！".format(str(len(message.server.roles))))
+
+    if message.content == '麺類一覧':
+        role = "\n".join([r.mention for r in message.author.roles][::-1])
+        up = discord.Color(random.randint(0,0xFFFFFF))
+        embed = discord.Embed(
+            title="**{}**が取得している麺類の一覧:".format(message.author),
+            description=role,
+            color=up
+        )
+        embed.set_thumbnail(
+            url="https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(message.author)
+        )
+        await client.send_message(message.channel,embed=embed)
+                                  
+    if message.content == "ヘルプ":
         embed=discord.Embed(
             title='**Help一覧**',
             colour=discord.Color(random.randint(0, 0xFFFFFF)),
@@ -239,22 +320,37 @@ async def on_message(message):
             inline=False
         )
         embed.add_field(
-            name=";info @メンション",
-            value="メンションした人の情報を得られます",
+            name="個人情報 @メンション",
+            value="メンションした人の情報を得られます\nメンションがなければ自分の情報が表示されます",
             inline=False
         )
         embed.add_field(
-            name=";serverinfo",
+            name="鯖情報",
             value="サーバーの情報を得られます",
             inline=False
         )
         embed.add_field(
-            name=";createrole 名前",
+            name="全麺類一覧",
+            value="この鯖の麺類役職をすべて表示します。",
+            inline=False
+        )
+        embed.add_field(
+            name="麺類一覧",
+            value="自分に付与されている麺類役職を表示します。",
+            inline=False
+        )
+        embed.add_field(
+            name="リスト [役職名]",
+            value="その役職を持っているメンバーを表示します。",
+            inline=False
+        )
+        embed.add_field(
+            name="麺類作成 [名前]",
             value="役職が作成されます。　例:;createrole Noodle\n@全ての麺類に祝福をより上に表示されてる役職は作成しないで下さい。",
             inline=False
         )
         embed.add_field(
-            name=";deleterole 名前",
+            name="麺類破棄 [名前]",
             value="役職が削除されます。　例:;deleterole Noodle\nもし役職を二個作ってしまった場合とかに使って下さい。",
             inline=False
         )
