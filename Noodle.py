@@ -15,8 +15,6 @@ except ImportError:
     print("Discord.py がインストールされていません。\nDiscord.pyをインストールしてください。")
     sys.exit(1)
 
-prefix=';'
-
 version=discord.__version__
 client= Bot(command_prefix=';', pm_help=True)
 status=['全ての麺類に祝福を...','麺類うめ～','このBOTは兄者によって作られました']
@@ -220,7 +218,7 @@ async def on_message(message):
         finally:
             pass
 
-     if message.content.startswith("リスト"):
+    if message.content.startswith("リスト"):
         async def send(member_data):
             up = discord.Color(random.randint(0,0xFFFFFF))
             name = message.content[4:]
