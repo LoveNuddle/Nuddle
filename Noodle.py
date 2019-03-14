@@ -15,23 +15,25 @@ except ImportError:
     print("Discord.py がインストールされていません。\nDiscord.pyをインストールしてください。")
     sys.exit(1)
 
-version=discord.__version__
-client= Bot(command_prefix=';', pm_help=True)
-status=['全ての麺類に祝福を...','麺類うめ～','このBOTは兄者によって作られました']
-m="私は"
-like="が好きです"
+version = discord.__version__
+client = Bot(command_prefix=';',pm_help=True)
+status = ['全ての麺類に祝福を...','麺類うめ～','このBOTは兄者によって作られました']
+m = "私は"
+like = "が好きです"
 
-#～～をプレイ中の場所を定期的に変更
+
+# ～～をプレイ中の場所を定期的に変更
 async def change_status():
     await client.wait_until_ready()
-    msgs=cycle(status)
+    msgs = cycle(status)
 
     while not client.is_closed:
-        current_status=next(msgs)
+        current_status = next(msgs)
         await client.change_presence(game=discord.Game(name=current_status))
         await asyncio.sleep(30)
 
-#Botの脳の部分
+
+# Botの脳の部分
 @client.event
 async def on_ready():
     print("Discordが準備されました。")
@@ -51,15 +53,15 @@ async def on_ready():
 @client.event
 async def on_message(message):
     global role
-    channel=message.channel
+    channel = message.channel
 
-    #発言がBotだった場合反応しない
+    # 発言がBotだった場合反応しない
     if client.user == message.author:
         return
 
-    #発言がDMだった場合反応しない
+    # 発言がDMだった場合反応しない
     if message.channel.type == ChannelType.private:
-        await client.send_message(message.channel, "**コマンドはDMでは使うことができません...**")
+        await client.send_message(message.channel,"**コマンドはDMでは使うことができません...**")
         return
 
     if message.content.startswith("麺類生成"):
@@ -70,23 +72,22 @@ async def on_message(message):
             role = await client.create_role(author.server,name=role_name,color=up)
             await client.send_message(message.channel,f'作成完了:{role_name} の役職を作成しました')
             member = discord.utils.get(message.server.members,name='We are the Noodle')
-            await client.add_roles(message.author, role)
+            await client.add_roles(message.author,role)
             await client.add_roles(member,role)
             await client.send_message(message.channel,f'付与完了:{role_name}の役職を<@515864876309282837>に付与しました')
-            await client.send_message(message.channel, f'{message.author.mention} さんに{role_name}役職を付与しました！')
+            await client.send_message(message.channel,f'{message.author.mention} さんに{role_name}役職を付与しました！')
 
     if like in message.content:
         roles = [role for role in message.server.roles if role.name in message.content]
-        await client.add_roles(message.author, *roles)
+        await client.add_roles(message.author,*roles)
         await client.send_message(message.channel,
                                   f'{message.author.mention} さんに{",".join([x.name for x in roles])}役職を付与しました！')
-
 
     if message.content.startswith("麺類廃棄"):
         if message.channel.id == "516098503265484854":
             role_name = message.content.split()[1]
             role = discord.utils.get(message.server.roles,name=role_name)
-            await client.delete_role(message.server, role)
+            await client.delete_role(message.server,role)
             await client.send_message(message.channel,f'作成完了:{role_name} の役職を削除しました')
 
     if message.content.startswith("個人情報"):
@@ -152,21 +153,21 @@ async def on_message(message):
             pass
 
     if message.content == "鯖情報":
-        server=message.server
-        region=message.server.region
-        channelss=len(message.server.channels)
-        memberss=len(message.server.members)
-        role=str(len(server.roles))
-        emoji=str(len(server.emojis))
-        owner=server.owner
-        tekitou=server.role_hierarchy[0]
-        online=0
+        server = message.server
+        region = message.server.region
+        channelss = len(message.server.channels)
+        memberss = len(message.server.members)
+        role = str(len(server.roles))
+        emoji = str(len(server.emojis))
+        owner = server.owner
+        tekitou = server.role_hierarchy[0]
+        online = 0
         for i in server.members:
             if str(i.status) == 'online' or str(i.status) == 'idle' or str(i.status) == 'dnd':
-                online+=1
-        up=discord.Color(random.randint(0, 0xFFFFFF))
+                online += 1
+        up = discord.Color(random.randint(0,0xFFFFFF))
         try:
-            userembed=discord.Embed(
+            userembed = discord.Embed(
                 title=server.name + "の情報:",
                 color=up
             )
@@ -178,7 +179,7 @@ async def on_message(message):
                 value=server.id
             )
             userembed.add_field(
-               name="サーバーオーナ:",
+                name="サーバーオーナ:",
                 value=owner
             )
             userembed.add_field(
@@ -212,9 +213,9 @@ async def on_message(message):
             userembed.set_footer(
                 text="サーバー作成日: " + server.created_at.__format__(' %Y/%m/%d %H:%M:%S')
             )
-            await client.send_message(message.channel, embed=userembed)
+            await client.send_message(message.channel,embed=userembed)
         except:
-            await client.send_message(message.channel, "すいません。ERRORです。.")
+            await client.send_message(message.channel,"すいません。ERRORです。.")
         finally:
             pass
 
@@ -295,11 +296,11 @@ async def on_message(message):
             url="https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(message.author)
         )
         await client.send_message(message.channel,embed=embed)
-                                  
+
     if message.content == "ヘルプ":
-        embed=discord.Embed(
+        embed = discord.Embed(
             title='**Help一覧**',
-            colour=discord.Color(random.randint(0, 0xFFFFFF)),
+            colour=discord.Color(random.randint(0,0xFFFFFF)),
             description=""
         )
         embed.set_footer(
@@ -344,15 +345,15 @@ async def on_message(message):
         )
         embed.add_field(
             name="麺類作成 [名前]",
-            value="役職が作成されます。　例:;createrole Noodle\n@全ての麺類に祝福をより上に表示されてる役職は作成しないで下さい。",
+            value="役職が作成されます。　例:麺類作成 Noodle\n全ての麺類に祝福をより上に表示されてる役職は作成しないで下さい。",
             inline=False
         )
         embed.add_field(
             name="麺類破棄 [名前]",
-            value="役職が削除されます。　例:;deleterole Noodle\nもし役職を二個作ってしまった場合とかに使って下さい。",
+            value="役職が削除されます。　例:麺類破棄 Noodle\nもし役職を二個作ってしまった場合とかに使って下さい。",
             inline=False
         )
-        await client.send_message(channel, embed=embed)
+        await client.send_message(channel,embed=embed)
 
 
 client.loop.create_task(change_status())
