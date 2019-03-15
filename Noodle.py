@@ -92,10 +92,7 @@ async def on_message(message):
 
     if message.content.startswith("個人情報"):
         try:
-            if not message.mentions[0] == None:
-                user = message.author
-            else:
-                user = message.mentions[0]
+            user = message.mentions[0]
             userjoindate = str(user.joined_at.strftime("%Y/%m/%d %H:%M:%S"))
             usercreatedate = str(user.created_at.strftime("%Y/%m/%d %H:%M:%S"))
             role = ", ".join([r.name for r in user.roles])
@@ -146,7 +143,7 @@ async def on_message(message):
 
             await client.send_message(message.channel,embed=userembed)
         except IndexError:
-            await client.send_message(message.channel,";info メンションをしてください。")
+            await client.send_message(message.channel,"個人情報 @メンションをしてください。")
         except:
             await client.send_message(message.channel,"すいません。ERRORです。")
         finally:
